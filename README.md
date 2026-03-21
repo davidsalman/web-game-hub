@@ -250,14 +250,14 @@ Email authentication is handled natively by Supabase Auth. No additional provide
 
 ## Cloudflare Deployment
 
-### Cloudflare Pages (recommended)
+### Cloudflare Workers (recommended)
 
-1. Connect your GitHub repo to Cloudflare Pages
-2. Set **Framework preset** to `Next.js`
-3. Build command: `npm run build`
-4. Output directory: `.next`
-5. Add all environment variables in the Cloudflare Pages dashboard
-6. Cloudflare Pages automatically handles ISR and edge caching
+1. Connect your GitHub repo to Cloudflare Workers
+2. Set Project Name ex: `web-game-hub`
+3. Set Build command (optional): '', Deploy command: `npm run deploy`, Path: `/`
+4. Select Advanced settings -> Non-production branch deploy command `npm run upload`
+5. Add all environment variables in the Cloudflare Workers -> Settings -> Runtime Environment Variables(see .env.local.example)
+6. Cloudflare Workers automatically handles ISR and edge caching, and will build and deploy to appropriate cloud environment.
 
 ### Self-hosted on Cloudflare Workers / Docker
 
