@@ -1,13 +1,60 @@
-import Link from 'next/link'
-import { Chrome, Facebook, Mail, Gamepad2 } from 'lucide-react'
-import type { Metadata } from 'next'
+'use client'
 
-export const metadata: Metadata = {
-  title: 'Create Account',
-  description: 'Create your free Web Game Hub account to save progress and track favorites.',
-}
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { useState } from 'react'
+import { Chrome, Facebook, Mail, Gamepad2 } from 'lucide-react'
+import { createClient } from '@/lib/supabase'
 
 export default function SignUpPage() {
+  const router = useRouter()
+  const [username, setUsername] = useState('')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState(false)
+
+  const supabase = createClient()
+
+  async function handleOAuth(provider: 'google' | 'facebook') {
+    setLoading(true)
+    setError(null)
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider,
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+      },
+    })
+    if (error) {
+      setError(error.message)
+      setLoading(false)
+    }
+  }
+
+  async function handleEmailSignUp(e: React.FormEvent) {
+    e.preventDefault()
+    setLoading(true)
+    setError(null)
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: { username, full_name: username },
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
+      },
+    })
+    if (error) {
+      setError(error.message)
+      setLoading(false)
+    } else {
+      setSuccess(true)
+      setLoading(false)
+      router.push('/')
+      router.refresh()
+    }
+  }
+
   return (
     <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-md">
@@ -34,26 +81,38 @@ export default function SignUpPage() {
             ))}
           </ul>
 
+          {error && (
+            <div className="mb-4 px-4 py-3 rounded-lg bg-red-900/40 border border-red-700/50 text-red-300 text-sm">
+              {error}
+            </div>
+          )}
+
+          {success && (
+            <div className="mb-4 px-4 py-3 rounded-lg bg-green-900/40 border border-green-700/50 text-green-300 text-sm">
+              Account created! Check your email to confirm your address.
+            </div>
+          )}
+
           {/* OAuth Buttons */}
           <div className="space-y-3 mb-6">
-            <form action="/api/auth/signin/google" method="POST">
-              <button
-                type="submit"
-                className="w-full flex items-center gap-3 px-4 py-3 bg-white hover:bg-gray-100 text-gray-800 font-medium rounded-xl transition-colors"
-              >
-                <Chrome size={20} className="text-blue-500" />
-                Sign up with Google
-              </button>
-            </form>
-            <form action="/api/auth/signin/facebook" method="POST">
-              <button
-                type="submit"
-                className="w-full flex items-center gap-3 px-4 py-3 bg-[#1877F2] hover:bg-[#166FE5] text-white font-medium rounded-xl transition-colors"
-              >
-                <Facebook size={20} />
-                Sign up with Facebook
-              </button>
-            </form>
+            <button
+              type="button"
+              disabled={loading}
+              onClick={() => handleOAuth('google')}
+              className="w-full flex items-center gap-3 px-4 py-3 bg-white hover:bg-gray-100 text-gray-800 font-medium rounded-xl transition-colors disabled:opacity-60"
+            >
+              <Chrome size={20} className="text-blue-500" />
+              Sign up with Google
+            </button>
+            <button
+              type="button"
+              disabled={loading}
+              onClick={() => handleOAuth('facebook')}
+              className="w-full flex items-center gap-3 px-4 py-3 bg-[#1877F2] hover:bg-[#166FE5] text-white font-medium rounded-xl transition-colors disabled:opacity-60"
+            >
+              <Facebook size={20} />
+              Sign up with Facebook
+            </button>
           </div>
 
           {/* Divider */}
@@ -64,7 +123,7 @@ export default function SignUpPage() {
           </div>
 
           {/* Email Form */}
-          <form className="space-y-4">
+          <form onSubmit={handleEmailSignUp} className="space-y-4">
             <div>
               <label htmlFor="username" className="block text-sm font-medium text-gray-300 mb-1.5">
                 Username
@@ -76,6 +135,8 @@ export default function SignUpPage() {
                 required
                 minLength={3}
                 maxLength={30}
+                value={username}
+                onChange={e => setUsername(e.target.value)}
                 className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 text-sm focus:outline-none focus:border-purple-500 transition-colors"
                 placeholder="Choose a username"
               />
@@ -89,6 +150,8 @@ export default function SignUpPage() {
                 type="email"
                 autoComplete="email"
                 required
+                value={email}
+                onChange={e => setEmail(e.target.value)}
                 className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 text-sm focus:outline-none focus:border-purple-500 transition-colors"
                 placeholder="you@example.com"
               />
@@ -103,16 +166,19 @@ export default function SignUpPage() {
                 autoComplete="new-password"
                 required
                 minLength={8}
+                value={password}
+                onChange={e => setPassword(e.target.value)}
                 className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 text-sm focus:outline-none focus:border-purple-500 transition-colors"
                 placeholder="At least 8 characters"
               />
             </div>
             <button
               type="submit"
-              className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-purple-600 hover:bg-purple-500 text-white font-semibold rounded-xl transition-colors"
+              disabled={loading}
+              className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-purple-600 hover:bg-purple-500 text-white font-semibold rounded-xl transition-colors disabled:opacity-60"
             >
               <Mail size={18} />
-              Create Account
+              {loading ? 'Creating account…' : 'Create Account'}
             </button>
           </form>
 
@@ -127,3 +193,4 @@ export default function SignUpPage() {
     </div>
   )
 }
+
