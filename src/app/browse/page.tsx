@@ -6,7 +6,6 @@ import GameCard from '@/components/GameCard'
 import AdBanner from '@/components/AdBanner'
 import SearchBar from '@/components/SearchBar'
 import { STATIC_GAMES, STATIC_CATEGORIES } from '@/lib/games-data'
-import type { Metadata } from 'next'
 import { Filter } from 'lucide-react'
 
 function BrowseContent() {
