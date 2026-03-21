@@ -56,7 +56,7 @@ A Next.js TypeScript web application for hosting a large library of free, unbloc
 
 ### Prerequisites
 
-- Node.js ≥ 18
+- Node.js ≥ 22.13.0
 - A [Supabase](https://supabase.com/) project
 - Google OAuth credentials (for Google SSO)
 - Facebook OAuth credentials (for Facebook/Meta SSO)
@@ -90,6 +90,7 @@ supabase db push
 # 1. supabase/migrations/001_create_tables.sql
 # 2. supabase/migrations/002_rls_policies.sql
 # 3. supabase/migrations/003_seed_data.sql
+# 4. supabase/migrations/004_auto_profile_trigger.sql
 ```
 
 ### 4. Start the development server
@@ -338,11 +339,11 @@ web-game-hub/
 | `/categories/[slug]` | SSG (1h ISR) | Category detail page with all games in that category |
 | `/games/[slug]` | SSG (1h ISR) | Game info — thumbnail, description, tags, "Play Now" CTA |
 | `/games/[slug]/play` | SSG + client gate | Game player — `GamePlayClient` checks cookie and renders iframe |
-| `/auth/signin` | Client | Sign-in page |
-| `/auth/signup` | Client | Sign-up page |
-| `/auth/forgot-password` | Client | Forgot password — sends reset email |
-| `/auth/reset-password` | Client | Reset password — set new password from email link |
-| `/auth/callback` | Dynamic | Supabase OAuth code-exchange handler |
+| `/auth/signin` | Static | Sign-in page |
+| `/auth/signup` | Static | Sign-up page |
+| `/auth/forgot-password` | Static | Forgot password — sends reset email |
+| `/auth/reset-password` | Static | Reset password — set new password from email link |
+| `/auth/callback` | Dynamic (SSR) | Supabase OAuth code-exchange handler |
 | `/profile` | Dynamic (SSR) | Authenticated user profile |
 
 ---
