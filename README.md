@@ -29,7 +29,7 @@ A Next.js TypeScript web application for hosting a large library of free, unbloc
 | Framework | [Next.js 16.1.7](https://nextjs.org/) — App Router, TypeScript |
 | Styling | [Tailwind CSS v4](https://tailwindcss.com/) |
 | Database | [Supabase](https://supabase.com/) — PostgreSQL with Row Level Security |
-| Authentication | [NextAuth.js v5](https://authjs.dev/) — Google OAuth, Facebook OAuth, Email/Password |
+| Authentication | [Supabase Auth](https://supabase.com/docs/guides/auth) — Google OAuth, Facebook OAuth, Email/Password |
 | Icons | [Lucide React](https://lucide.dev/) |
 | Hosting | [Cloudflare Pages](https://pages.cloudflare.com/) (edge-compatible standalone output) |
 | CDN / DNS | Cloudflare |
@@ -123,15 +123,10 @@ Copy `.env.local.example` to `.env.local` and fill in each value:
 | `NEXT_PUBLIC_SUPABASE_URL` | Your Supabase project URL (e.g. `https://xxxx.supabase.co`) |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase `anon` public key |
 | `SUPABASE_SERVICE_ROLE_KEY` | Supabase `service_role` secret key (server-side only) |
-| `NEXTAUTH_URL` | Full URL of your app (e.g. `http://localhost:3000`) |
-| `NEXTAUTH_SECRET` | A random secret string — run `openssl rand -base64 32` to generate |
-| `GOOGLE_CLIENT_ID` | Google OAuth client ID |
-| `GOOGLE_CLIENT_SECRET` | Google OAuth client secret |
-| `FACEBOOK_CLIENT_ID` | Facebook/Meta app ID |
-| `FACEBOOK_CLIENT_SECRET` | Facebook/Meta app secret |
 | `NEXT_PUBLIC_GOOGLE_ADSENSE_CLIENT` | AdSense publisher ID (e.g. `ca-pub-1234567890`) |
 
 > **Security note**: Never commit `.env.local` to source control. Only `.env.local.example` is committed.
+> Google and Facebook OAuth credentials are configured directly in the **Supabase dashboard** under Authentication → Providers. They do not need to be added to `.env.local`.
 
 ---
 
@@ -144,6 +139,7 @@ Copy `.env.local.example` to `.env.local` and fill in each value:
 | `001_create_tables.sql` | Creates `categories`, `games`, `profiles`, and `play_history` tables with indexes |
 | `002_rls_policies.sql` | Enables RLS and creates policies for all tables |
 | `003_seed_data.sql` | Seeds 10 categories and 50 games |
+| `004_auto_profile_trigger.sql` | Postgres trigger to auto-create a `profiles` row when a new user signs up |
 
 ### Schema overview
 
@@ -201,32 +197,37 @@ play_history
 
 ## Authentication Setup
 
-This project uses **NextAuth.js v5** (`next-auth@^5`) with three providers:
+This project uses **Supabase Auth** directly for all authentication. JWT sessions are managed automatically by Supabase and stored as cookies via `@supabase/ssr`.
 
 ### 1. Google SSO
 
 1. Go to [Google Cloud Console](https://console.cloud.google.com/) → APIs & Services → Credentials
 2. Create an **OAuth 2.0 Client ID** (Web application)
-3. Add authorized redirect URI: `https://your-domain.com/api/auth/callback/google`
-4. Copy Client ID and Client Secret to `.env.local`
+3. Add authorized redirect URI: `https://<your-supabase-project>.supabase.co/auth/v1/callback`
+4. In the [Supabase dashboard](https://app.supabase.com/) go to **Authentication → Providers → Google**
+5. Enter your **Client ID** and **Client Secret** and save
 
 ### 2. Facebook / Meta SSO
 
 1. Go to [Meta for Developers](https://developers.facebook.com/) → My Apps → Create App
 2. Add the **Facebook Login** product
-3. Add valid OAuth redirect URI: `https://your-domain.com/api/auth/callback/facebook`
-4. Copy App ID and App Secret to `.env.local`
+3. Add valid OAuth redirect URI: `https://<your-supabase-project>.supabase.co/auth/v1/callback`
+4. In the [Supabase dashboard](https://app.supabase.com/) go to **Authentication → Providers → Facebook**
+5. Enter your **App ID** and **App Secret** and save
 
 ### 3. Email / Password
 
-Email authentication goes through **Supabase Auth**. No additional setup needed beyond the Supabase project credentials. Users sign up at `/auth/signup` and are authenticated via `supabase.auth.signInWithPassword()`.
+Email authentication is handled natively by Supabase Auth. No additional provider configuration is needed. Users sign up at `/auth/signup` and can recover their password via `/auth/forgot-password`.
 
 ### Auth flow
 
 - Sign-in page: `/auth/signin`
 - Sign-up page: `/auth/signup`
-- After sign-in, a `profiles` row is automatically created for new users
-- NextAuth JWT strategy — session is stored in a JWT cookie, not a database
+- Forgot password page: `/auth/forgot-password`
+- Reset password page: `/auth/reset-password`
+- OAuth callback: `/auth/callback` (exchanges the authorization code for a Supabase session)
+- On first sign-in a `profiles` row is automatically created via a Postgres trigger (`004_auto_profile_trigger.sql`)
+- Sessions are stored as cookies and validated server-side using `@supabase/ssr`
 
 ---
 
@@ -287,8 +288,9 @@ web-game-hub/
     ├── types/
     │   └── index.ts            # TypeScript interfaces (Category, Game, UserProfile, etc.)
     ├── lib/
-    │   ├── supabase.ts         # Supabase client factory (browser, SSR, static, service-role)
-    │   ├── auth.ts             # NextAuth config (Google, Facebook, Credentials)
+    │   ├── supabase.ts         # Supabase client factory (browser, static, service-role)
+    │   ├── supabase-server.ts  # Server-only Supabase client with cookie support (SSR)
+    │   ├── auth.ts             # Supabase Auth type re-exports
     │   └── games-data.ts       # Data fetching helpers + static fallback data (50 games, 10 categories)
     ├── components/
     │   ├── Header.tsx          # Top navigation with auth state, search trigger, mobile menu
@@ -315,14 +317,13 @@ web-game-hub/
         │       │   ├── page.tsx            # Play page shell (SSG)
         │       │   └── GamePlayClient.tsx  # Client component: page-gate check + iframe player
         ├── auth/
+        │   ├── callback/route.ts           # Supabase OAuth code-exchange callback
         │   ├── signin/page.tsx             # Sign-in form (Google, Facebook, Email)
-        │   └── signup/page.tsx             # Sign-up form (Email + password via Supabase)
+        │   ├── signup/page.tsx             # Sign-up form (Google, Facebook, Email)
+        │   ├── forgot-password/page.tsx    # Forgot password — sends reset email
+        │   └── reset-password/page.tsx     # Reset password — sets new password from email link
         ├── profile/
-        │   └── page.tsx                    # User profile (dynamic — reads session)
-        └── api/
-            └── auth/
-                └── [...nextauth]/
-                    └── route.ts            # NextAuth API route handler
+        │   └── page.tsx                    # User profile (dynamic — reads Supabase session)
 ```
 
 ---
@@ -337,10 +338,12 @@ web-game-hub/
 | `/categories/[slug]` | SSG (1h ISR) | Category detail page with all games in that category |
 | `/games/[slug]` | SSG (1h ISR) | Game info — thumbnail, description, tags, "Play Now" CTA |
 | `/games/[slug]/play` | SSG + client gate | Game player — `GamePlayClient` checks cookie and renders iframe |
-| `/auth/signin` | Static | Sign-in page |
-| `/auth/signup` | Static | Sign-up page |
+| `/auth/signin` | Client | Sign-in page |
+| `/auth/signup` | Client | Sign-up page |
+| `/auth/forgot-password` | Client | Forgot password — sends reset email |
+| `/auth/reset-password` | Client | Reset password — set new password from email link |
+| `/auth/callback` | Dynamic | Supabase OAuth code-exchange handler |
 | `/profile` | Dynamic (SSR) | Authenticated user profile |
-| `/api/auth/[...nextauth]` | Dynamic | NextAuth.js API handler |
 
 ---
 
@@ -377,7 +380,7 @@ Next.js App Router with maximum static generation:
 - **`export const revalidate = 3600`** on all data-fetching pages → ISR with 1-hour cache
 - **`generateStaticParams()`** on all `[slug]` routes → all 50 game pages and 10 category pages pre-built at deploy time
 - **`STATIC_GAMES` / `STATIC_CATEGORIES`** arrays in `src/lib/games-data.ts` act as the fallback data source when Supabase is not configured, ensuring the build always succeeds
-- Only `/profile` and `/api/auth/[...nextauth]` are dynamic (server-rendered on demand)
+- Only `/profile` and `/auth/callback` are dynamic (server-rendered on demand)
 
 ---
 
