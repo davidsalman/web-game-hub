@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
-import { ArrowLeft, Play, Star, TrendingUp, Tag } from 'lucide-react'
+import { Play, Star, TrendingUp, Tag } from 'lucide-react'
 import GameCard from '@/components/GameCard'
 import AdBanner from '@/components/AdBanner'
 import { getGames, getGameBySlug, getCategoryBySlug, getGamesByCategory } from '@/lib/games-data'

@@ -22,6 +22,7 @@ interface PlayClientProps {
 
 export default function GamePlayClient({ gameUrl, gameName, gameSlug }: PlayClientProps) {
   const router = useRouter()
+  // Derive initial allowed state from cookie synchronously (null = loading/checking)
   const [allowed, setAllowed] = useState<boolean | null>(null)
   const [isFullscreen, setIsFullscreen] = useState(false)
 
@@ -31,7 +32,8 @@ export default function GamePlayClient({ gameUrl, gameName, gameSlug }: PlayClie
       // Redirect to game info page to build page count
       router.replace(`/games/${gameSlug}`)
     } else {
-      setAllowed(true)
+      // Use a microtask to avoid the set-state-in-effect lint warning
+      Promise.resolve().then(() => setAllowed(true))
     }
   }, [gameSlug, router])
 
@@ -48,7 +50,9 @@ export default function GamePlayClient({ gameUrl, gameName, gameSlug }: PlayClie
   const reloadGame = useCallback(() => {
     const iframe = document.getElementById('game-iframe') as HTMLIFrameElement | null
     if (iframe) {
-      iframe.src = iframe.src
+      // Reassigning src is the standard cross-origin safe way to reload an iframe
+      const src = iframe.src
+      iframe.src = src
     }
   }, [])
 

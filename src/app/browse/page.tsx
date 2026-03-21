@@ -16,7 +16,7 @@ function BrowseContent() {
 
   const [selectedCategory, setSelectedCategory] = useState(categoryParam)
   const [sortBy, setSortBy] = useState<'popular' | 'rating' | 'new'>('popular')
-  const [searchQuery, setSearchQuery] = useState(queryParam)
+  const [searchQuery] = useState(queryParam)
 
   const filteredGames = useMemo(() => {
     let games = [...STATIC_GAMES]

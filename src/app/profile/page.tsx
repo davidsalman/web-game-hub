@@ -64,7 +64,7 @@ export default function ProfilePage() {
         <Gamepad2 size={36} className="text-purple-400 mx-auto mb-3" />
         <h2 className="text-xl font-bold text-white mb-2">Track Your Gaming Journey</h2>
         <p className="text-gray-400 mb-4 max-w-md mx-auto">
-          Create a free account to save your favorite games, track how many hours you've played, and get personalized recommendations.
+          Create a free account to save your favorite games, track how many hours you&apos;ve played, and get personalized recommendations.
         </p>
         <div className="flex gap-3 justify-center">
           <Link href="/auth/signup" className="px-6 py-2.5 bg-purple-600 hover:bg-purple-500 text-white font-semibold rounded-xl transition-colors">
