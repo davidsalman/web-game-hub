@@ -10,6 +10,11 @@ type ProfileRow = {
   total_plays: number | null
 }
 
+type PlayHistoryRow = {
+  game_id: string
+  played_at: string
+}
+
 export const metadata: Metadata = {
   title: 'My Profile',
   description: 'Manage your Web Game Hub profile and view your gaming history.',
@@ -24,6 +29,7 @@ export default async function ProfilePage() {
 
   let favoriteGameIds: string[] = []
   let totalPlays = 0
+  let recentGames: typeof allGames = []
 
   if (user) {
     const { data: profile } = await supabase
@@ -34,9 +40,21 @@ export default async function ProfilePage() {
 
     favoriteGameIds = profile?.favorite_games ?? []
     totalPlays = profile?.total_plays ?? 0
+
+    const { data: playHistory } = await supabase
+      .from('play_history')
+      .select('game_id, played_at')
+      .eq('user_id', user.id)
+      .order('played_at', { ascending: false })
+      .limit(25)
+
+    const recentGameIds = Array.from(
+      new Set((playHistory as PlayHistoryRow[] | null)?.map((row) => row.game_id) ?? [])
+    ).slice(0, 4)
+
+    recentGames = allGames.filter((game) => recentGameIds.includes(game.id))
   }
 
-  const recentGames = allGames.slice(0, 4)
   const favoriteGames = user
     ? allGames.filter(game => favoriteGameIds.includes(game.id)).slice(0, 4)
     : allGames.filter(g => g.is_featured).slice(0, 4)
@@ -125,17 +143,25 @@ export default async function ProfilePage() {
         </div>
       )}
 
-      {/* Recently Released Games */}
+      {/* Recently Played Games */}
       <section className="mb-8">
         <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
           <Clock size={20} className="text-purple-400" />
-          Recently Added Games
+          Recently Played Games
         </h2>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          {recentGames.map(game => (
-            <GameCard key={game.id} game={game} />
-          ))}
-        </div>
+        {recentGames.length > 0 ? (
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            {recentGames.map(game => (
+              <GameCard key={game.id} game={game} />
+            ))}
+          </div>
+        ) : (
+          <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 text-gray-400 text-sm">
+            {user
+              ? 'No play history yet. Start a game to see your recently played list.'
+              : 'Sign in to track and view your recently played games.'}
+          </div>
+        )}
       </section>
 
       {/* Favorite Games */}
