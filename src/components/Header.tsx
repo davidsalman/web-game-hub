@@ -67,7 +67,7 @@ export default function Header() {
 
           {/* Right actions */}
           <div className="flex items-center gap-3">
-            <div className="hidden sm:block py-3 border-t border-gray-800">
+            <div className="hidden sm:block py-3">
               <SearchBar disabled={pathname === '/browse'}/>
             </div>
             {user ? (

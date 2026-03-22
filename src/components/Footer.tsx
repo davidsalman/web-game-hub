@@ -1,7 +1,24 @@
+'use client'
+
 import Link from 'next/link'
+import { useEffect, useState } from 'react'
 import { Gamepad2, Github, Twitter } from 'lucide-react'
+import { createClient } from '@/lib/supabase'
+import type { User as SupabaseUser } from '@supabase/supabase-js'
 
 export default function Footer() {
+  const [user, setUser] = useState<SupabaseUser | null>(null)
+  const supabase = createClient()
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => setUser(data.user))
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null)
+    })
+    return () => subscription.unsubscribe()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   return (
     <footer className="bg-gray-950 border-t border-gray-800 mt-auto">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -52,11 +69,15 @@ export default function Footer() {
           <div>
             <h3 className="text-white font-semibold text-sm uppercase tracking-wider mb-4">Account</h3>
             <ul className="space-y-2">
-              {[
-                { href: '/auth/signin', label: 'Sign In' },
-                { href: '/auth/signup', label: 'Sign Up' },
-                { href: '/profile', label: 'My Profile' },
-              ].map(({ href, label }) => (
+              {(user
+                ? [
+                    { href: '/profile', label: 'My Profile' },
+                  ]
+                : [
+                    { href: '/auth/signin', label: 'Sign In' },
+                    { href: '/auth/signup', label: 'Sign Up' },
+                  ]
+              ).map(({ href, label }) => (
                 <li key={href}>
                   <Link href={href} className="text-gray-400 hover:text-white text-sm transition-colors">
                     {label}

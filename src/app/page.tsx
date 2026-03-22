@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { ArrowRight, Zap, Star, TrendingUp, Clock } from 'lucide-react'
+import { ArrowRight, Zap, Star, TrendingUp } from 'lucide-react'
 import GameCard from '@/components/GameCard'
 import CategoryCard from '@/components/CategoryCard'
 import AdBanner from '@/components/AdBanner'
@@ -19,7 +19,7 @@ export default async function HomePage() {
     getFeaturedGames(),
     getGames(),
   ])
-  const recentGames = allGames.slice(0, 4)
+
   const popularGames = [...allGames].sort((a, b) => b.play_count - a.play_count).slice(0, 8)
 
   return (
@@ -124,19 +124,6 @@ export default async function HomePage() {
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
           {popularGames.map(game => (
-            <GameCard key={game.id} game={game} />
-          ))}
-        </div>
-      </section>
-
-      {/* Recently Released Games */}
-      <section className="mb-8">
-        <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-          <Clock size={20} className="text-purple-400" />
-          Recently Added Games
-        </h2>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          {recentGames.map(game => (
             <GameCard key={game.id} game={game} />
           ))}
         </div>
