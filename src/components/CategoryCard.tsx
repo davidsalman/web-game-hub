@@ -15,7 +15,7 @@ export default function CategoryCard({ category, gameCount }: CategoryCardProps)
           <div className="flex items-start justify-between">
             <div>
               <div className="text-3xl mb-3">{category.icon}</div>
-              <h3 className="font-bold text-white text-lg group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:bg-clip-text"
+              <h3 className={`font-bold text-white text-lg group-hover:text-xl group-hover:bg-gradient-to-r group-hover:bg-clip-text`}
                 style={{ backgroundImage: undefined }}>
                 {category.name}
               </h3>

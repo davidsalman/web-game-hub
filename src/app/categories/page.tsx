@@ -1,7 +1,10 @@
+import Link from 'next/link'
+import GameCard from '@/components/GameCard'
 import CategoryCard from '@/components/CategoryCard'
 import AdBanner from '@/components/AdBanner'
 import { getCategories, getGames } from '@/lib/games-data'
 import type { Metadata } from 'next'
+import { ArrowRight } from 'lucide-react'
 
 export const metadata: Metadata = {
   title: 'Game Categories',
@@ -18,8 +21,12 @@ export default async function CategoriesPage() {
     game_count: games.filter(g => g.category_id === cat.id).length,
   }))
 
+  const newGames = [...games].sort((a, b) =>
+    new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+  ).slice(0, 4)
+
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <div className="max-w-7xl mx-auto lg:px-8 py-10">
       <div className="mb-10">
         <h1 className="text-3xl font-bold text-white mb-3">Game Categories</h1>
         <p className="text-gray-400 text-lg">
@@ -34,6 +41,21 @@ export default async function CategoriesPage() {
           <CategoryCard key={cat.id} category={cat} gameCount={cat.game_count} />
         ))}
       </div>
+
+      {/* New Games */}
+      <section className="max-w-7xl mx-auto py-8 pb-16">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-bold text-white">New Arrivals</h2>
+          <Link href="/browse?filter=new" className="text-purple-400 hover:text-purple-300 text-sm font-medium flex items-center gap-1">
+            View all <ArrowRight size={16} />
+          </Link>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          {newGames.map(game => (
+            <GameCard key={game.id} game={game} />
+          ))}
+        </div>
+      </section>
 
       <AdBanner slot="5678901234" format="rectangle" className="w-full mt-10" />
     </div>

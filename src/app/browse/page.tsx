@@ -1,12 +1,11 @@
 'use client'
 
-import { useState, useMemo, Suspense } from 'react'
+import { useState, useMemo, Suspense, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
 import GameCard from '@/components/GameCard'
 import AdBanner from '@/components/AdBanner'
-import SearchBar from '@/components/SearchBar'
 import { STATIC_GAMES, STATIC_CATEGORIES } from '@/lib/games-data'
-import { Filter } from 'lucide-react'
+import { Filter, Search, X } from 'lucide-react'
 
 function BrowseContent() {
   const searchParams = useSearchParams()
@@ -16,7 +15,11 @@ function BrowseContent() {
 
   const [selectedCategory, setSelectedCategory] = useState(categoryParam)
   const [sortBy, setSortBy] = useState<'popular' | 'rating' | 'new'>('popular')
-  const [searchQuery] = useState(queryParam)
+  const [searchQuery, setSearchQuery] = useState(queryParam)
+
+  useEffect(() => {
+    setSearchQuery(queryParam)
+  }, [queryParam])
 
   const filteredGames = useMemo(() => {
     let games = [...STATIC_GAMES]
@@ -61,23 +64,29 @@ function BrowseContent() {
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-4 mb-8">
         <div className="flex-1">
-          <SearchBar
-            placeholder="Search games..."
-            onClose={() => {}}
-          />
+          <div className="relative flex items-center">
+            <Search size={18} className="absolute left-3 text-gray-500 pointer-events-none" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              placeholder="Search games..."
+              className="w-full bg-gray-800 border border-gray-700 rounded-lg pl-10 pr-10 py-2.5 text-white placeholder-gray-500 text-sm focus:outline-none focus:border-purple-500 transition-colors"
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery('')}
+                className="absolute right-3 text-gray-500 hover:text-white transition-colors"
+                aria-label="Clear search"
+              >
+                <X size={16} />
+              </button>
+            )}
+          </div>
         </div>
         <div className="flex items-center gap-3">
           <Filter size={18} className="text-gray-500" />
-          <select
-            value={selectedCategory}
-            onChange={e => setSelectedCategory(e.target.value)}
-            className="bg-gray-800 border border-gray-700 text-white text-sm rounded-lg px-3 py-2.5 focus:outline-none focus:border-purple-500"
-          >
-            <option value="">All Categories</option>
-            {STATIC_CATEGORIES.map(cat => (
-              <option key={cat.id} value={cat.slug}>{cat.name}</option>
-            ))}
-          </select>
           <select
             value={sortBy}
             onChange={e => setSortBy(e.target.value as 'popular' | 'rating' | 'new')}

@@ -51,7 +51,7 @@ function SignInForm() {
   }
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center px-4 py-12">
+    <div className="min-h-[calc(100vh-4rem-24rem)] flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-md">
         {/* Card */}
         <div className="bg-gray-900 rounded-2xl border border-gray-800 p-8">
@@ -78,7 +78,7 @@ function SignInForm() {
               type="button"
               disabled={loading}
               onClick={() => handleOAuth('google')}
-              className="w-full flex items-center gap-3 px-4 py-3 bg-white hover:bg-gray-100 text-gray-800 font-medium rounded-xl transition-colors disabled:opacity-60"
+              className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-white hover:bg-gray-100 text-gray-800 font-medium rounded-xl transition-colors disabled:opacity-60"
             >
               <Chrome size={20} className="text-blue-500" />
               Continue with Google
@@ -87,7 +87,7 @@ function SignInForm() {
               type="button"
               disabled={loading}
               onClick={() => handleOAuth('facebook')}
-              className="w-full flex items-center gap-3 px-4 py-3 bg-[#1877F2] hover:bg-[#166FE5] text-white font-medium rounded-xl transition-colors disabled:opacity-60"
+              className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-[#1877F2] hover:bg-[#166FE5] text-white font-medium rounded-xl transition-colors disabled:opacity-60"
             >
               <Facebook size={20} />
               Continue with Facebook

@@ -55,7 +55,7 @@ export default function Header() {
               <Link
                 key={href}
                 href={href}
-                className={`text-sm font-medium transition-colors ${
+                className={`text-xl font-medium transition-colors ${
                   pathname === href
                     ? 'text-purple-400'
                     : 'text-gray-300 hover:text-white'
@@ -68,13 +68,23 @@ export default function Header() {
 
           {/* Right actions */}
           <div className="flex items-center gap-3">
-            <button
-              onClick={() => setSearchOpen(!searchOpen)}
-              className="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"
-              aria-label="Search"
-            >
-              <Search size={20} />
-            </button>
+            {pathname !== '/browse' && (
+              <>
+                <button
+                  onClick={() => setSearchOpen(!searchOpen)}
+                  className="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"
+                  aria-label="Search"
+                >
+                  <Search size={20} />
+                </button>
+                {/* Search bar */}
+                {searchOpen && (
+                  <div className="py-3 border-t border-gray-800">
+                    <SearchBar onClose={() => setSearchOpen(false)} />
+                  </div>
+                )}
+              </>
+            )}
             {user ? (
               <>
                 <Link
@@ -111,13 +121,6 @@ export default function Header() {
             </button>
           </div>
         </div>
-
-        {/* Search bar */}
-        {searchOpen && (
-          <div className="py-3 border-t border-gray-800">
-            <SearchBar onClose={() => setSearchOpen(false)} />
-          </div>
-        )}
 
         {/* Mobile menu */}
         {mobileOpen && (

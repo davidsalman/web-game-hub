@@ -21,9 +21,6 @@ export default async function HomePage() {
   ])
 
   const popularGames = [...allGames].sort((a, b) => b.play_count - a.play_count).slice(0, 8)
-  const newGames = [...allGames].sort((a, b) =>
-    new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-  ).slice(0, 4)
 
   return (
     <div>
@@ -136,21 +133,6 @@ export default async function HomePage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         <AdBanner slot="0987654321" format="rectangle" className="w-full" />
       </div>
-
-      {/* New Games */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-16">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-white">New Arrivals</h2>
-          <Link href="/browse?filter=new" className="text-purple-400 hover:text-purple-300 text-sm font-medium flex items-center gap-1">
-            View all <ArrowRight size={16} />
-          </Link>
-        </div>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          {newGames.map(game => (
-            <GameCard key={game.id} game={game} />
-          ))}
-        </div>
-      </section>
     </div>
   )
 }

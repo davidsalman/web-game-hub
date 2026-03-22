@@ -33,7 +33,7 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center px-4 py-12">
+    <div className="min-h-[calc(100vh-4rem-24rem)] flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-md">
         <div className="bg-gray-900 rounded-2xl border border-gray-800 p-8">
           <div className="text-center mb-8">
