@@ -43,13 +43,13 @@ export default async function HomePage() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               href="/browse"
-              className="inline-flex items-center gap-2 px-8 py-3.5 bg-purple-600 hover:bg-purple-500 text-white font-semibold rounded-xl transition-colors text-lg"
+              className="inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-purple-600 hover:bg-purple-500 text-white font-semibold rounded-xl transition-colors text-lg"
             >
               Browse Games <ArrowRight size={20} />
             </Link>
             <Link
               href="/categories"
-              className="inline-flex items-center gap-2 px-8 py-3.5 bg-gray-800 hover:bg-gray-700 text-white font-semibold rounded-xl transition-colors text-lg"
+              className="inline-flex items-center  justify-center gap-2 px-8 py-3.5 bg-gray-800 hover:bg-gray-700 text-white font-semibold rounded-xl transition-colors text-lg"
             >
               View Categories
             </Link>
@@ -130,7 +130,7 @@ export default async function HomePage() {
       </section>
 
       {/* Ad Banner */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <AdBanner slot="0987654321" format="rectangle" className="w-full" />
       </div>
     </div>

@@ -26,7 +26,7 @@ export default async function CategoriesPage() {
   ).slice(0, 4)
 
   return (
-    <div className="max-w-7xl mx-auto lg:px-8 py-10">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
       <div className="mb-10">
         <h1 className="text-3xl font-bold text-white mb-3">Game Categories</h1>
         <p className="text-gray-400 text-lg">

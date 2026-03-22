@@ -99,7 +99,7 @@ export default function GamePlayClient({ gameUrl, gameName, gameSlug }: PlayClie
       <div
         id="game-container"
         className="relative bg-black rounded-xl overflow-hidden border border-gray-800 shadow-2xl"
-        style={{ aspectRatio: '16/9', minHeight: 400 }}
+        style={{ aspectRatio: '16/9', height: 'auto', }}
       >
         <iframe
           id="game-iframe"

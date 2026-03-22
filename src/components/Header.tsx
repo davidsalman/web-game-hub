@@ -3,14 +3,13 @@
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react'
-import { Gamepad2, Menu, X, Search, User, LogIn, LogOut } from 'lucide-react'
+import { Gamepad2, Menu, X, User, LogIn, LogOut } from 'lucide-react'
 import SearchBar from './SearchBar'
 import { createClient } from '@/lib/supabase'
 import type { User as SupabaseUser } from '@supabase/supabase-js'
 
 export default function Header() {
   const [mobileOpen, setMobileOpen] = useState(false)
-  const [searchOpen, setSearchOpen] = useState(false)
   const [user, setUser] = useState<SupabaseUser | null>(null)
   const pathname = usePathname()
   const router = useRouter()
@@ -44,7 +43,7 @@ export default function Header() {
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 font-bold text-xl text-white">
             <Gamepad2 className="text-purple-400" size={28} />
-            <span className="hidden sm:block bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+            <span className="sm:block bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
               Web Game Hub
             </span>
           </Link>
@@ -68,23 +67,9 @@ export default function Header() {
 
           {/* Right actions */}
           <div className="flex items-center gap-3">
-            {pathname !== '/browse' && (
-              <>
-                <button
-                  onClick={() => setSearchOpen(!searchOpen)}
-                  className="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"
-                  aria-label="Search"
-                >
-                  <Search size={20} />
-                </button>
-                {/* Search bar */}
-                {searchOpen && (
-                  <div className="py-3 border-t border-gray-800">
-                    <SearchBar onClose={() => setSearchOpen(false)} />
-                  </div>
-                )}
-              </>
-            )}
+            <div className="hidden sm:block py-3 border-t border-gray-800">
+              <SearchBar disabled={pathname === '/browse'}/>
+            </div>
             {user ? (
               <>
                 <Link
@@ -125,6 +110,9 @@ export default function Header() {
         {/* Mobile menu */}
         {mobileOpen && (
           <div className="md:hidden py-4 border-t border-gray-800 space-y-1">
+            <div className="pb-2 flex gap-2">
+              <SearchBar disabled={pathname === '/browse'} fullWidth />
+            </div>
             {navLinks.map(({ href, label }) => (
               <Link
                 key={href}

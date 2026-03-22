@@ -62,7 +62,7 @@ function BrowseContent() {
       <AdBanner slot="2345678901" format="horizontal" className="w-full mb-8" />
 
       {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-4 mb-8">
+      <div className="flex flex-row gap-4 mb-8">
         <div className="flex-1">
           <div className="relative flex items-center">
             <Search size={18} className="absolute left-3 text-gray-500 pointer-events-none" />

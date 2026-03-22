@@ -5,9 +5,9 @@ export default function Footer() {
   return (
     <footer className="bg-gray-950 border-t border-gray-800 mt-auto">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
           {/* Brand */}
-          <div className="md:col-span-2">
+          <div className="col-span-2 md:col-span-2">
             <Link href="/" className="flex items-center gap-2 font-bold text-xl text-white mb-3">
               <Gamepad2 className="text-purple-400" size={24} />
               <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
