@@ -4,6 +4,7 @@ import Image from 'next/image'
 import { Play, Star, TrendingUp, Tag } from 'lucide-react'
 import GameCard from '@/components/GameCard'
 import AdBanner from '@/components/AdBanner'
+import FavoriteGameButton from '@/components/FavoriteGameButton'
 import { getGames, getGameBySlug, getCategoryBySlug, getGamesByCategory } from '@/lib/games-data'
 import type { Metadata } from 'next'
 
@@ -97,14 +98,17 @@ export default async function GameDetailPage({ params }: Props) {
           <div className="bg-gray-900 rounded-xl p-6 border border-gray-800">
             <div className="flex items-start justify-between gap-4 mb-4">
               <h1 className="text-3xl font-bold text-white">{game.name}</h1>
-              {category && (
-                <Link
-                  href={`/categories/${category.slug}`}
-                  className="shrink-0 flex items-center gap-1.5 text-sm bg-gray-800 hover:bg-gray-700 text-gray-300 px-3 py-1.5 rounded-lg transition-colors"
-                >
-                  {category.icon} {category.name}
-                </Link>
-              )}
+              <div className="shrink-0 flex items-center gap-2">
+                <FavoriteGameButton gameSlug={game.slug} />
+                {category && (
+                  <Link
+                    href={`/categories/${category.slug}`}
+                    className="shrink-0 flex items-center gap-1.5 text-sm bg-gray-800 hover:bg-gray-700 text-gray-300 px-3 py-1.5 rounded-lg transition-colors"
+                  >
+                    {category.icon} {category.name}
+                  </Link>
+                )}
+              </div>
             </div>
 
             {/* Stats */}

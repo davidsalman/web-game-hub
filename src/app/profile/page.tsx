@@ -1,9 +1,14 @@
 import Link from 'next/link'
 import { User, Gamepad2, Heart, Clock, Settings } from 'lucide-react'
-import { STATIC_GAMES } from '@/lib/games-data'
+import { getGames } from '@/lib/games-data'
 import GameCard from '@/components/GameCard'
 import { createServerClient } from '@/lib/supabase-server'
 import type { Metadata } from 'next'
+
+type ProfileRow = {
+  favorite_games: string[] | null
+  total_plays: number | null
+}
 
 export const metadata: Metadata = {
   title: 'My Profile',
@@ -15,9 +20,28 @@ export const dynamic = 'force-dynamic'
 export default async function ProfilePage() {
   const supabase = await createServerClient()
   const { data: { user } } = await supabase.auth.getUser()
+  const allGames = await getGames()
 
-  const recentGames = STATIC_GAMES.slice(0, 4)
-  const favoriteGames = STATIC_GAMES.filter(g => g.is_featured).slice(0, 4)
+  let favoriteGameIds: string[] = []
+  let totalPlays = 0
+
+  if (user) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('favorite_games, total_plays')
+      .eq('user_id', user.id)
+      .single<ProfileRow>()
+
+    favoriteGameIds = profile?.favorite_games ?? []
+    totalPlays = profile?.total_plays ?? 0
+  }
+
+  const recentGames = allGames.slice(0, 4)
+  const favoriteGames = user
+    ? allGames.filter(game => favoriteGameIds.includes(game.id)).slice(0, 4)
+    : allGames.filter(g => g.is_featured).slice(0, 4)
+
+  const estimatedHoursPlayed = Math.floor(totalPlays * 0.25)
 
   const displayName = user?.user_metadata?.full_name
     ?? user?.user_metadata?.username
@@ -70,9 +94,9 @@ export default async function ProfilePage() {
       {/* Stats */}
       <div className="grid grid-cols-3 gap-4 mb-8">
         {[
-          { icon: Gamepad2, label: 'Games Played', value: '0' },
-          { icon: Heart, label: 'Favorites', value: '0' },
-          { icon: Clock, label: 'Hours Played', value: '0' },
+          { icon: Gamepad2, label: 'Games Played', value: user ? totalPlays.toString() : '0' },
+          { icon: Heart, label: 'Favorites', value: user ? favoriteGameIds.length.toString() : '0' },
+          { icon: Clock, label: 'Hours Played', value: user ? estimatedHoursPlayed.toString() : '0' },
         ].map(({ icon: Icon, label, value }) => (
           <div key={label} className="bg-gray-900 rounded-xl border border-gray-800 p-4 text-center">
             <Icon size={24} className="text-purple-400 mx-auto mb-2" />
@@ -114,17 +138,23 @@ export default async function ProfilePage() {
         </div>
       </section>
 
-      {/* Featured Games */}
+      {/* Favorite Games */}
       <section>
         <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
           <Heart size={20} className="text-pink-400" />
-          Featured Games You Might Like
+          {user ? 'Your Favorite Games' : 'Featured Games You Might Like'}
         </h2>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          {favoriteGames.map(game => (
-            <GameCard key={game.id} game={game} />
-          ))}
-        </div>
+        {favoriteGames.length > 0 ? (
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            {favoriteGames.map(game => (
+              <GameCard key={game.id} game={game} />
+            ))}
+          </div>
+        ) : (
+          <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 text-gray-400 text-sm">
+            No favorites yet. Open a game and tap Favorite to add it here.
+          </div>
+        )}
       </section>
     </div>
   )

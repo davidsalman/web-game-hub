@@ -25,6 +25,7 @@ export default function GamePlayClient({ gameUrl, gameName, gameSlug }: PlayClie
   // Derive initial allowed state from cookie synchronously (null = loading/checking)
   const [allowed, setAllowed] = useState<boolean | null>(null)
   const [isFullscreen, setIsFullscreen] = useState(false)
+  const [playTracked, setPlayTracked] = useState(false)
 
   useEffect(() => {
     const count = getPageCount()
@@ -36,6 +37,38 @@ export default function GamePlayClient({ gameUrl, gameName, gameSlug }: PlayClie
       Promise.resolve().then(() => setAllowed(true))
     }
   }, [gameSlug, router])
+
+  useEffect(() => {
+    if (!allowed || playTracked) return
+
+    let active = true
+
+    async function trackPlay() {
+      try {
+        const response = await fetch('/api/games/play', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ gameSlug }),
+        })
+
+        if (!active) return
+
+        if (response.ok || response.status === 401) {
+          setPlayTracked(true)
+        }
+      } catch {
+        if (active) {
+          setPlayTracked(true)
+        }
+      }
+    }
+
+    trackPlay()
+
+    return () => {
+      active = false
+    }
+  }, [allowed, gameSlug, playTracked])
 
   const toggleFullscreen = useCallback(() => {
     const el = document.getElementById('game-container')
